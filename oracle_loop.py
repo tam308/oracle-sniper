@@ -77,12 +77,13 @@ AVAILABILITY_DOMAIN = "jyJN:AP-SINGAPORE-1-AD-1"
 SSH_PUBLIC_KEY = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3r6xjC4Qfj9tqmiaqKxlbyHlXZoiwcQl3Oqbq4aFSjGz+M/J8ONmXsBUFU4DIi0jH+zK0yNJuUHb5gipcl0RBeEL+rdxDItQ29zdbDSGcgYzTOsV3L2tDQWF9ziL27v/FxHGTfIlnyMj2Z1lmlMV5DyJXI+O1I+3ERCROpKxjyo5A29zPSdIC8hz9n2+A1q9UY+CjVfPA+BWvSaxscxHfvkrNVJbKXZh0N0Tx1zd0/9xnQ90JFvfnJO4AYuUZEkbUDyTkXVHuJERDazUPy2bCnloU2RTrqGoAgjYltV3PEKmP7R+pTSas5Y9uChrtMPbaePGNvS61cOoizpVYMnJx ssh-key-2026-06-22"
 
 # --- ARM AMPERE FLEX SETTINGS ---
-# Free tier total is 4 OCPU / 24 GB per region. Set to the minimum (1 OCPU /
-# 6 GB) so it fits into whatever A1 quota is left. If you have NO other A1
-# instance, bump these back to 4.0 / 24.0 to grab the whole free allocation.
+# This account's A1 limit is 2 OCPU (standard-a1-core-count = 2), not the usual
+# 4 -- so 4 OCPU fails with LimitExceeded. Grab the full 2 OCPU / 12 GB allowed.
+# (1:6 core:memory ratio, matching the limit.) Bump these up only if you later
+# get a limit increase to 4 cores.
 SHAPE = "VM.Standard.A1.Flex"
-OCPUS = 1.0
-MEMORY_IN_GBS = 6.0
+OCPUS = 2.0
+MEMORY_IN_GBS = 12.0
 IMAGE_ID = "ocid1.image.oc1.ap-singapore-1.aaaaaaaamynzciw3t7fypsdqahuupzsvbv5ewlubquu3ksfqugxchksgxm4q"
 
 DISPLAY_NAME = "Free-ARM-Ampere-Server"
