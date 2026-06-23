@@ -218,6 +218,11 @@ if __name__ == "__main__":
 
             if result == "fatal":
                 print("Aborting loop due to a non-capacity error (see message above).")
+                send_notification(
+                    "Sniper STOPPED on a non-capacity error (auth/config/quota). "
+                    "It is no longer trying -- check the Actions logs.",
+                    title="Oracle Sniper STOPPED",
+                )
                 sys.exit(1)
 
             if result == "throttled":
