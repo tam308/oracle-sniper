@@ -37,4 +37,6 @@ jobs:
           # End each run after ~9 minutes so the job finishes and the cron
           # starts a fresh one. Keeps us well under the 12-min job timeout.
           MAX_RUNTIME_SECONDS: "540"
-        run: python oracle_loop.py
+          # Stream print() output live instead of buffering it until exit.
+          PYTHONUNBUFFERED: "1"
+        run: python -u oracle_loop.py
