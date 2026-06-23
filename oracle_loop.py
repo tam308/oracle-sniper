@@ -3,8 +3,27 @@ import sys
 import time
 import json
 import ctypes
+import urllib.request
 from datetime import datetime
 import oci
+
+def send_notification(message, title="Oracle ARM Sniper"):
+    """Push a phone notification via ntfy.sh (or any URL in NOTIFY_URL).
+    No-op if NOTIFY_URL isn't set, so local runs are unaffected."""
+    url = os.environ.get("NOTIFY_URL")
+    if not url:
+        return
+    try:
+        req = urllib.request.Request(
+            url,
+            data=message.encode("utf-8"),
+            method="POST",
+            headers={"Title": title, "Priority": "high", "Tags": "tada"},
+        )
+        urllib.request.urlopen(req, timeout=10)
+        print("Notification sent.")
+    except Exception as e:
+        print(f"Could not send notification: {e}")
 
 # Keep Windows awake while this runs, even if the laptop would normally sleep.
 # On CI (Linux) these are no-ops -- the runner never sleeps.
@@ -110,6 +129,10 @@ def launch_instance(compute_client, fault_domain=None):
         response = compute_client.launch_instance(launch_details)
         print("🎉 Success! ARM Ampere instance is now provisioning.")
         print(f"Instance ID: {response.data.id}")
+        send_notification(
+            f"Got it! ARM Ampere (4 OCPU / 24GB) is provisioning.\n"
+            f"Instance ID: {response.data.id}"
+        )
         return "success"
     except oci.exceptions.ServiceError as e:
         # Always print the full error so we can tell a capacity miss apart

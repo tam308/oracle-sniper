@@ -39,4 +39,6 @@ jobs:
           MAX_RUNTIME_SECONDS: "540"
           # Stream print() output live instead of buffering it until exit.
           PYTHONUNBUFFERED: "1"
+          # Phone push on success via ntfy.sh.
+          NOTIFY_URL: ${{ secrets.NOTIFY_URL }}
         run: python -u oracle_loop.py
