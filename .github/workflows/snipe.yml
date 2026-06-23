@@ -1,0 +1,40 @@
+name: Oracle ARM Sniper
+
+# Runs on a schedule AND can be triggered manually from the Actions tab.
+on:
+  schedule:
+    # Every 10 minutes. GitHub's minimum is 5 min, and scheduled runs can be
+    # delayed under load -- that's fine, each run is a self-contained burst.
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+# If a previous run is still going, don't pile a second one on top.
+concurrency:
+  group: oracle-sniper
+  cancel-in-progress: false
+
+jobs:
+  snipe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install OCI SDK
+        run: pip install oci
+
+      - name: Run sniper burst
+        env:
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_KEY_CONTENT: ${{ secrets.OCI_KEY_CONTENT }}
+          # End each run after ~9 minutes so the job finishes and the cron
+          # starts a fresh one. Keeps us well under the 12-min job timeout.
+          MAX_RUNTIME_SECONDS: "540"
+        run: python oracle_loop.py

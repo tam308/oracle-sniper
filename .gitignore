@@ -1,0 +1,14 @@
+# NEVER commit OCI credentials
+*.pem
+*.key
+.oci/
+oci_api_key*
+
+# Local logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+oci-env/
