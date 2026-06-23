@@ -3,10 +3,10 @@ name: Oracle ARM Sniper
 # Runs on a schedule AND can be triggered manually from the Actions tab.
 on:
   schedule:
-    # Every 8 hours (3 runs/day). Private repos only get 2,000 free
-    # Actions-minutes/month (~66/day), so we run a few long bursts instead of
-    # constant short ones: 3 x ~20 min = ~60 min/day, ~1,800/month -> under cap.
-    - cron: "0 */8 * * *"
+    # Every 10 minutes (GitHub's practical minimum). Public repos get unlimited
+    # free Actions minutes, so we snipe aggressively. GitHub may still delay or
+    # skip individual scheduled runs -- that's fine, each run is self-contained.
+    - cron: "*/10 * * * *"
   workflow_dispatch: {}
 
 # If a previous run is still going, don't pile a second one on top.
@@ -17,7 +17,7 @@ concurrency:
 jobs:
   snipe:
     runs-on: ubuntu-latest
-    timeout-minutes: 22
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
 
@@ -35,9 +35,9 @@ jobs:
           OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
           OCI_REGION: ${{ secrets.OCI_REGION }}
           OCI_KEY_CONTENT: ${{ secrets.OCI_KEY_CONTENT }}
-          # ~19 min of sniping per run (3 runs/day x 8h cron = ~60 min/day,
-          # ~1,800/month -> under the 2,000 private-repo free cap).
-          MAX_RUNTIME_SECONDS: "1140"
+          # End each run after ~9 min so the job finishes and the cron starts a
+          # fresh one. Unlimited minutes on public, so we run near-continuously.
+          MAX_RUNTIME_SECONDS: "540"
           # Stream print() output live instead of buffering it until exit.
           PYTHONUNBUFFERED: "1"
           # Phone push on success via ntfy.sh.
