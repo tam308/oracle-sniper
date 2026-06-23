@@ -3,10 +3,13 @@ name: Oracle ARM Sniper
 # Runs on a schedule AND can be triggered manually from the Actions tab.
 on:
   schedule:
-    # Every 10 minutes (GitHub's practical minimum). Public repos get unlimited
-    # free Actions minutes, so we snipe aggressively. GitHub may still delay or
-    # skip individual scheduled runs -- that's fine, each run is self-contained.
-    - cron: "*/10 * * * *"
+    # Each run snipes for ~5h40m on its own (see MAX_RUNTIME_SECONDS), so we do
+    # NOT depend on GitHub's flaky high-frequency cron to stay alive. This cron
+    # just restarts a fresh run after each one ends. We fire it often (every
+    # 15 min) so that whenever a run finishes, a new one starts soon after --
+    # even though GitHub delays/skips many of these triggers, we only need the
+    # occasional one to land.
+    - cron: "*/15 * * * *"
   workflow_dispatch: {}
 
 # If a previous run is still going, don't pile a second one on top.
@@ -17,7 +20,9 @@ concurrency:
 jobs:
   snipe:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    # GitHub's hard cap is 6h (360 min). Run almost that long so each job snipes
+    # continuously and we barely depend on cron.
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
 
@@ -35,9 +40,10 @@ jobs:
           OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
           OCI_REGION: ${{ secrets.OCI_REGION }}
           OCI_KEY_CONTENT: ${{ secrets.OCI_KEY_CONTENT }}
-          # End each run after ~9 min so the job finishes and the cron starts a
-          # fresh one. Unlimited minutes on public, so we run near-continuously.
-          MAX_RUNTIME_SECONDS: "540"
+          # Snipe for ~5h40m per run, then exit cleanly just before the 350-min
+          # job timeout. One run covers hours on its own -> near-continuous
+          # coverage without relying on frequent cron firing.
+          MAX_RUNTIME_SECONDS: "20400"
           # Stream print() output live instead of buffering it until exit.
           PYTHONUNBUFFERED: "1"
           # Phone push on success via ntfy.sh.
