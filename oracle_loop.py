@@ -77,9 +77,12 @@ AVAILABILITY_DOMAIN = "jyJN:AP-SINGAPORE-1-AD-1"
 SSH_PUBLIC_KEY = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3r6xjC4Qfj9tqmiaqKxlbyHlXZoiwcQl3Oqbq4aFSjGz+M/J8ONmXsBUFU4DIi0jH+zK0yNJuUHb5gipcl0RBeEL+rdxDItQ29zdbDSGcgYzTOsV3L2tDQWF9ziL27v/FxHGTfIlnyMj2Z1lmlMV5DyJXI+O1I+3ERCROpKxjyo5A29zPSdIC8hz9n2+A1q9UY+CjVfPA+BWvSaxscxHfvkrNVJbKXZh0N0Tx1zd0/9xnQ90JFvfnJO4AYuUZEkbUDyTkXVHuJERDazUPy2bCnloU2RTrqGoAgjYltV3PEKmP7R+pTSas5Y9uChrtMPbaePGNvS61cOoizpVYMnJx ssh-key-2026-06-22"
 
 # --- ARM AMPERE FLEX SETTINGS ---
+# Free tier total is 4 OCPU / 24 GB per region. Set to the minimum (1 OCPU /
+# 6 GB) so it fits into whatever A1 quota is left. If you have NO other A1
+# instance, bump these back to 4.0 / 24.0 to grab the whole free allocation.
 SHAPE = "VM.Standard.A1.Flex"
-OCPUS = 4.0
-MEMORY_IN_GBS = 24.0
+OCPUS = 1.0
+MEMORY_IN_GBS = 6.0
 IMAGE_ID = "ocid1.image.oc1.ap-singapore-1.aaaaaaaamynzciw3t7fypsdqahuupzsvbv5ewlubquu3ksfqugxchksgxm4q"
 
 DISPLAY_NAME = "Free-ARM-Ampere-Server"
@@ -130,7 +133,7 @@ def launch_instance(compute_client, fault_domain=None):
         print("🎉 Success! ARM Ampere instance is now provisioning.")
         print(f"Instance ID: {response.data.id}")
         send_notification(
-            f"Got it! ARM Ampere (4 OCPU / 24GB) is provisioning.\n"
+            f"Got it! ARM Ampere ({OCPUS:g} OCPU / {MEMORY_IN_GBS:g}GB) is provisioning.\n"
             f"Instance ID: {response.data.id}"
         )
         return "success"
